@@ -36,7 +36,7 @@ async function run() {
         const ordersCollection = client.db('bioji-metal').collection('orders');
         const userCollection = client.db('bioji-metal').collection('users');
 
-        // all parts data load
+        // all products data load
         app.get('/products', async (req, res) => {
             const query = {};
             const cursor = productsCollection.find(query);
@@ -44,7 +44,7 @@ async function run() {
             res.send(products);
         });
 
-        // single part data load 
+        // single products data load 
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -52,12 +52,35 @@ async function run() {
             res.send(product);
         });
 
+        app.delete('/products/:id',async , (req, res)=>{
+            const id =req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateData = req.body;
+            const filter = {_id: ObjectId(id)}
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: updateData,
+            };
+            const result = await productsCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({result, token});
+    });
+
+        //post single data
+
         app.post("/orders", async (req, res) => {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
 
+        //order single data load
         app.get('/orders', verifyJWt, async (req, res) => {
             const buyerEmail = req.query.buyerEmail;
             const decodedEmail=req.decoded.email;
@@ -74,8 +97,8 @@ async function run() {
         });
 
 
-
-        app.put('/users/:email', async (req, res) => {
+        //add & update user
+        app.put('/user/:email', async (req, res) => {
             const user = req.body;
             const email = req.params.email;
             const filter = { email: email };
@@ -88,12 +111,18 @@ async function run() {
             res.send({result, token});
     });
 
-    app.get('/users', verifyJWt, async(req, res)=>{
-        const users = await userCollection.find().toArray();
+
+    app.get('/allusers', verifyJWt, async (req, res) => {
+        const query = {};
+        const cursor = userCollection.find(query);
+        const users = await cursor.toArray();
         res.send(users);
     });
 
-    app.put('/users/admin/:email', verifyJWt, async (req, res) => {
+    
+  //make admin
+
+    app.put('/user/admin/:email', verifyJWt, async (req, res) => {
         const email = req.params.email;
         const filter = { email: email };
         const requester = req.decoded.email;
@@ -109,6 +138,7 @@ async function run() {
             res.status(403).send({ message: '403 - Forbidden access' });
         }
     });
+
     app.get('/admin/:email', async (req, res) => {
         const email = req.params.email;
         const user = await userCollection.findOne({ email: email });
@@ -116,12 +146,12 @@ async function run() {
         res.send({ admin: isAdmin });
     });
 
-    // add new product 
-    // app.post("/parts", async (req, res) => {
-    //     const newProduct = req.body;
-    //     const result = await partsCollection.insertOne(newProduct);
-    //     res.send(result);
-    // });
+ //add new products
+    app.post("/products", async (req, res) => {
+        const newProduct = req.body;
+        const result = await partsCollection.insertOne(newProduct);
+        res.send(result);
+    });
 
         
 
