@@ -52,25 +52,25 @@ async function run() {
             res.send(product);
         });
 
-        app.delete('/products/:id',async , (req, res)=>{
-            const id =req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await productsCollection.deleteOne(query);
-            res.send(result);
-        })
+        // app.delete('/products/:id',async , (req, res)=>{
+        //     const id =req.params.id;
+        //     const query = { _id: ObjectId(id) };
+        //     const result = await productsCollection.deleteOne(query);
+        //     res.send(result);
+        // })
 
-        app.put('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const updateData = req.body;
-            const filter = {_id: ObjectId(id)}
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: updateData,
-            };
-            const result = await productsCollection.updateOne(filter, updateDoc, options);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-            res.send({result, token});
-    });
+        // app.put('/products/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const updateData = req.body;
+        //     const filter = {_id: ObjectId(id)}
+        //     const options = { upsert: true };
+        //     const updateDoc = {
+        //         $set: updateData,
+        //     };
+        //     const result = await productsCollection.updateOne(filter, updateDoc, options);
+        //     const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+        //     res.send({result, token});
+   // });
 
         //post single data
 
@@ -126,7 +126,7 @@ async function run() {
         const email = req.params.email;
         const filter = { email: email };
         const requester = req.decoded.email;
-        const requesterAccount = await userCollection.findOne({ email: requester });
+        const requesterAccount = await user-+Collection.findOne({ email: requester });
         if (requesterAccount.role === 'admin') {
             const updateDoc = {
                 $set: { role: 'admin' },
